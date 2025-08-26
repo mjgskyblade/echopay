@@ -1,0 +1,195 @@
+openapi: 3.0.3
+info:
+  title: EchoPay Compliance Service API (EchoNet)
+  version: 1.0.0
+  description: Regulatory reporting and KYC/AML integration service
+  contact:
+    name: EchoPay Development Team
+
+servers:
+  - url: http://localhost:8004
+    description: Local development server
+
+paths:
+  /api/v1/kyc/verify:
+    post:
+      summary: Verify KYC status
+      description: Perform Know Your Customer verification
+      operationId: verifyKYC
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  format: uuid
+                documentType:
+                  type: string
+                  enum: [passport, drivers_license, national_id]
+                documentData:
+                  type: object
+                  properties:
+                    documentNumber:
+                      type: string
+                    expiryDate:
+                      type: string
+                      format: date
+                    issueDate:
+                      type: string
+                      format: date
+      responses:
+        '200':
+          description: KYC verification completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    format: uuid
+                  verified:
+                    type: boolean
+                  verificationLevel:
+                    type: string
+                    enum: [basic, enhanced, premium]
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          description: Invalid verification request
+
+  /api/v1/aml/screen:
+    post:
+      summary: Perform AML screening
+      description: Screen transaction for Anti-Money Laundering compliance
+      operationId: screenAML
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+                  format: uuid
+                amount:
+                  type: number
+                  format: decimal
+                currency:
+                  type: string
+                parties:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        format: uuid
+                      role:
+                        type: string
+                        enum: [sender, receiver]
+      responses:
+        '200':
+          description: AML screening completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                    format: uuid
+                  cleared:
+                    type: boolean
+                  riskLevel:
+                    type: string
+                    enum: [low, medium, high]
+                  flags:
+                    type: array
+                    items:
+                      type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/v1/reports/regulatory:
+    post:
+      summary: Generate regulatory report
+      description: Create automated regulatory compliance report
+      operationId: generateRegulatoryReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reportType:
+                  type: string
+                  enum: [suspicious_activity, transaction_summary, compliance_audit]
+                dateRange:
+                  type: object
+                  properties:
+                    startDate:
+                      type: string
+                      format: date
+                    endDate:
+                      type: string
+                      format: date
+                jurisdiction:
+                  type: string
+                  enum: [US, EU, UK, GLOBAL]
+      responses:
+        '200':
+          description: Report generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reportId:
+                    type: string
+                    format: uuid
+                  downloadUrl:
+                    type: string
+                    format: uri
+                  format:
+                    type: string
+                    enum: [PDF, XML, JSON]
+
+  /api/v1/iso20022/format:
+    post:
+      summary: Format message for ISO 20022 compliance
+      description: Convert transaction data to ISO 20022 standard format
+      operationId: formatISO20022
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                messageType:
+                  type: string
+                  enum: [pacs.008, pacs.002, camt.056]
+                transactionData:
+                  type: object
+      responses:
+        '200':
+          description: Message formatted successfully
+          content:
+            application/xml:
+              schema:
+                type: string
+
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy

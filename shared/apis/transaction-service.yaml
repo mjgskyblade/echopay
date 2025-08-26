@@ -1,0 +1,110 @@
+openapi: 3.0.3
+info:
+  title: EchoPay Transaction Service API
+  version: 1.0.0
+  description: High-speed transaction processing service
+  contact:
+    name: EchoPay Development Team
+
+servers:
+  - url: http://localhost:8001
+    description: Local development server
+
+paths:
+  /api/v1/transactions:
+    post:
+      summary: Process a new transaction
+      description: Submit a transaction for processing with fraud detection
+      operationId: createTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../models/transaction.yaml#/components/schemas/TransactionRequest'
+      responses:
+        '200':
+          description: Transaction processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../models/transaction.yaml#/components/schemas/TransactionResponse'
+        '400':
+          description: Invalid transaction request
+        '402':
+          description: Insufficient funds
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+
+  /api/v1/transactions/{transactionId}:
+    get:
+      summary: Get transaction details
+      description: Retrieve details of a specific transaction
+      operationId: getTransaction
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transaction details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '../models/transaction.yaml#/components/schemas/Transaction'
+        '404':
+          description: Transaction not found
+
+  /api/v1/transactions/{transactionId}/status:
+    patch:
+      summary: Update transaction status
+      description: Update the status of an existing transaction
+      operationId: updateTransactionStatus
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [completed, failed, reversed]
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Status updated successfully
+        '400':
+          description: Invalid status update
+        '404':
+          description: Transaction not found
+
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Check service health status
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                  status:
+                    type: string

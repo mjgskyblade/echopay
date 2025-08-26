@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Fraud - EchoPay Wallet</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        .step-indicator.active {
+            background-color: #3B82F6;
+            color: white;
+        }
+        .step-indicator.completed {
+            background-color: #10B981;
+            color: white;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .file-drop-zone {
+            border: 2px dashed #D1D5DB;
+            transition: all 0.3s ease;
+        }
+        .file-drop-zone.dragover {
+            border-color: #3B82F6;
+            background-color: #EFF6FF;
+        }
+        .evidence-item {
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <i class="fas fa-wallet text-2xl mr-3"></i>
+                        <h1 class="text-xl font-bold text-gray-800">EchoPay Wallet</h1>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">Report Fraud</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Progress Indicator -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="step-indicator active w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold mr-4" data-step="1">
+                        1
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">Transaction Details</span>
+                </div>
+                <div class="flex-1 mx-4">
+                    <div class="h-1 bg-gray-200 rounded">
+                        <div class="progress-bar h-1 bg-blue-600 rounded" style="width: 33%"></div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="step-indicator w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold mr-4 bg-gray-200 text-gray-600" data-step="2">
+                        2
+                    </div>
+                    <span class="text-sm font-medium text-gray-500">Evidence & Details</span>
+                </div>
+                <div class="flex-1 mx-4">
+                    <div class="h-1 bg-gray-200 rounded">
+                        <div class="progress-bar h-1 bg-gray-200 rounded" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="step-indicator w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold bg-gray-200 text-gray-600" data-step="3">
+                        3
+                    </div>
+                    <span class="text-sm font-medium text-gray-500">Review & Submit</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fraud Report Form -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <!-- Step 1: Transaction Details -->
+            <div id="step1" class="step-content active">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Transaction Details</h2>
+                    <p class="text-gray-600">Please provide details about the fraudulent transaction you want to report.</p>
+                </div>
+
+                <form id="step1Form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Transaction ID</label>
+                            <input type="text" id="transactionId" name="transactionId" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="Enter transaction ID or search">
+                            <button type="button" id="searchTransactionBtn" class="mt-2 text-sm text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-search mr-1"></i>Search my transactions
+                            </button>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Transaction Date</label>
+                            <input type="date" id="transactionDate" name="transactionDate" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                            <input type="number" id="amount" name="amount" step="0.01" min="0"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                            <select id="currency" name="currency" 
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="USD-CBDC">USD-CBDC</option>
+                                <option value="EUR-CBDC">EUR-CBDC</option>
+                                <option value="GBP-CBDC">GBP-CBDC</option>
+                                <option value="JPY-CBDC">JPY-CBDC</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fraud Type</label>
+                        <select id="fraudType" name="fraudType" required
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select fraud type</option>
+                            <option value="unauthorized_transaction">Unauthorized Transaction</option>
+                            <option value="account_takeover">Account Takeover</option>
+                            <option value="phishing_scam">Phishing Scam</option>
+                            <option value="fake_merchant">Fake Merchant</option>
+                            <option value="social_engineering">Social Engineering</option>
+                            <option value="identity_theft">Identity Theft</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Brief Description</label>
+                        <textarea id="briefDescription" name="briefDescription" rows="3" required
+                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Briefly describe what happened..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="button" id="step1NextBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">
+                            Next: Evidence & Details
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 2: Evidence & Details -->
+            <div id="step2" class="step-content">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Evidence & Additional Details</h2>
+                    <p class="text-gray-600">Provide additional information and upload any evidence to support your fraud report.</p>
+                </div>
+
+                <form id="step2Form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Detailed Description</label>
+                        <textarea id="detailedDescription" name="detailedDescription" rows="5" required
+                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Please provide a detailed description of the incident, including timeline, how you discovered the fraud, and any relevant circumstances..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">When did you first notice?</label>
+                            <input type="datetime-local" id="discoveryDate" name="discoveryDate" required
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Have you contacted the recipient?</label>
+                            <select id="contactedRecipient" name="contactedRecipient" required
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select option</option>
+                                <option value="yes">Yes, I contacted them</option>
+                                <option value="no">No, I haven't contacted them</option>
+                                <option value="unable">Unable to contact them</option>
+                                <option value="unknown_recipient">Unknown recipient</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload Evidence</label>
+                        <p class="text-sm text-gray-500 mb-3">Upload screenshots, emails, messages, or other evidence (Max 10MB per file, up to 5 files)</p>
+                        
+                        <div id="fileDropZone" class="file-drop-zone rounded-lg p-8 text-center cursor-pointer">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-700 mb-2">Drop files here or click to browse</p>
+                            <p class="text-sm text-gray-500">Supported formats: JPG, PNG, PDF, DOC, TXT</p>
+                            <input type="file" id="evidenceFiles" name="evidenceFiles" multiple 
+                                   accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt" class="hidden">
+                        </div>
+
+                        <div id="uploadedFiles" class="mt-4 space-y-2"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Additional Information</label>
+                        <textarea id="additionalInfo" name="additionalInfo" rows="3"
+                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Any other relevant information that might help with the investigation..."></textarea>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button type="button" id="step2BackBtn" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                            <i class="fas fa-arrow-left mr-2"></i>Back
+                        </button>
+                        <button type="button" id="step2NextBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">
+                            Next: Review & Submit
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 3: Review & Submit -->
+            <div id="step3" class="step-content">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Review & Submit</h2>
+                    <p class="text-gray-600">Please review your fraud report before submitting. Once submitted, you'll receive a case number for tracking.</p>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Review Summary -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Report Summary</h3>
+                        <div id="reviewSummary" class="space-y-3">
+                            <!-- Summary will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <input type="checkbox" id="termsAccepted" name="termsAccepted" required
+                                   class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <div class="ml-3">
+                                <label for="termsAccepted" class="text-sm font-medium text-gray-700">
+                                    I acknowledge and agree to the following:
+                                </label>
+                                <ul class="mt-2 text-sm text-gray-600 space-y-1">
+                                    <li>• The information provided is accurate to the best of my knowledge</li>
+                                    <li>• Filing a false fraud report is a serious offense</li>
+                                    <li>• I understand that investigation may take up to 72 hours</li>
+                                    <li>• I will cooperate with any additional investigation requirements</li>
+                                    <li>• I have read and agree to the <a href="#" class="text-blue-600 hover:underline">Terms of Service</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Preferences -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">How would you like to receive updates?</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="notificationPrefs" value="email" checked
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-600">Email notifications</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="notificationPrefs" value="push" checked
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-600">Push notifications</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="notificationPrefs" value="sms"
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-600">SMS notifications</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button type="button" id="step3BackBtn" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                            <i class="fas fa-arrow-left mr-2"></i>Back
+                        </button>
+                        <button type="button" id="submitReportBtn" class="bg-red-600 text-white px-8 py-2 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500">
+                            <i class="fas fa-flag mr-2"></i>Submit Fraud Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Search Modal -->
+    <div id="transactionSearchModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-4xl mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Search Transactions</h3>
+                <button id="closeSearchModal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <input type="text" id="transactionSearchInput" placeholder="Search by description, amount, or date..."
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div id="transactionSearchResults" class="space-y-2 max-h-96 overflow-y-auto">
+                <!-- Search results will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-check text-2xl text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Report Submitted Successfully</h3>
+                <p class="text-gray-600 mb-4">Your fraud report has been submitted and assigned case number:</p>
+                <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                    <span id="caseNumber" class="font-mono text-lg font-semibold text-blue-600"></span>
+                </div>
+                <p class="text-sm text-gray-500 mb-6">You will receive updates on the investigation progress. Expected resolution time is within 72 hours.</p>
+                <div class="flex space-x-3">
+                    <button id="trackCaseBtn" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                        Track Case
+                    </button>
+                    <button id="returnHomeBtn" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+                        Return Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/fraud-report.js"></script>
+</body>
+</html>

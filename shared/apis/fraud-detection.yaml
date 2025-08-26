@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: EchoPay Fraud Detection Service API
+  version: 1.0.0
+  description: Real-time ML-powered fraud analysis service
+  contact:
+    name: EchoPay Development Team
+
+servers:
+  - url: http://localhost:8002
+    description: Local development server
+
+paths:
+  /api/v1/analyze:
+    post:
+      summary: Analyze transaction for fraud
+      description: Perform real-time fraud analysis on a transaction
+      operationId: analyzeTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+                  format: uuid
+                fromWallet:
+                  type: string
+                  format: uuid
+                toWallet:
+                  type: string
+                  format: uuid
+                amount:
+                  type: number
+                  format: decimal
+                currency:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+                userContext:
+                  type: object
+                  properties:
+                    deviceId:
+                      type: string
+                    ipAddress:
+                      type: string
+                    location:
+                      type: object
+                      properties:
+                        latitude:
+                          type: number
+                        longitude:
+                          type: number
+      responses:
+        '200':
+          description: Fraud analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '../models/fraud-case.yaml#/components/schemas/RiskScore'
+        '400':
+          description: Invalid analysis request
+        '500':
+          description: Analysis service error
+
+  /api/v1/models/update:
+    post:
+      summary: Update ML models with feedback
+      description: Provide feedback to improve fraud detection models
+      operationId: updateModels
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+                  format: uuid
+                actualFraud:
+                  type: boolean
+                feedbackType:
+                  type: string
+                  enum: [false_positive, false_negative, confirmed_fraud]
+      responses:
+        '200':
+          description: Model feedback processed
+        '400':
+          description: Invalid feedback data
+
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy

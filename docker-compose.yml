@@ -1,0 +1,240 @@
+version: '3.8'
+
+services:
+  # Core Services
+  transaction-service:
+    build: ./services/transaction-service
+    ports:
+      - "8001:8001"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=echopay_transactions
+      - DB_USER=echopay
+      - DB_PASSWORD=echopay_dev
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - echopay-network
+
+  fraud-detection:
+    build: ./services/fraud-detection
+    ports:
+      - "8002:8002"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - KAFKA_BROKERS=kafka:9092
+      - ML_MODEL_PATH=/app/models
+    depends_on:
+      - redis
+      - kafka
+    networks:
+      - echopay-network
+
+  token-management:
+    build: ./services/token-management
+    ports:
+      - "8003:8003"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=echopay_tokens
+      - DB_USER=echopay
+      - DB_PASSWORD=echopay_dev
+    depends_on:
+      - postgres
+    networks:
+      - echopay-network
+
+  compliance-service:
+    build: ./services/compliance-service
+    ports:
+      - "8004:8004"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=echopay_compliance
+      - DB_USER=echopay
+      - DB_PASSWORD=echopay_dev
+    depends_on:
+      - postgres
+    networks:
+      - echopay-network
+
+  reversibility-service:
+    build: ./services/reversibility-service
+    ports:
+      - "8005:8005"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=echopay_reversibility
+      - DB_USER=echopay
+      - DB_PASSWORD=echopay_dev
+      - KAFKA_BROKERS=kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - echopay-network
+
+  cbdc-registry:
+    build: ./services/cbdc-registry
+    ports:
+      - "8006:8006"
+    environment:
+      - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+      - EXCHANGE_RATE_API_KEY=development-key
+    depends_on:
+      - redis
+    networks:
+      - echopay-network
+
+  international-fraud-coordination:
+    build: ./services/international-fraud-coordination
+    ports:
+      - "3007:3007"
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=info
+      - SIGNING_KEY=international-coordination-key
+      - PRIMARY_CONTACT_EMAIL=fraud-coordination@echopay.com
+      - EMERGENCY_CONTACT_PHONE=+1-555-FRAUD
+      - US_FRAUD_ENDPOINT=https://api.us-cbdc.gov/fraud
+      - EU_FRAUD_ENDPOINT=https://api.eu-cbdc.europa.eu/fraud
+      - UK_FRAUD_ENDPOINT=https://api.uk-cbdc.gov.uk/fraud
+      - CA_FRAUD_ENDPOINT=https://api.ca-cbdc.gc.ca/fraud
+      - JP_FRAUD_ENDPOINT=https://api.jp-cbdc.boj.or.jp/fraud
+      - AU_FRAUD_ENDPOINT=https://api.au-cbdc.rba.gov.au/fraud
+      - US_CASE_ENDPOINT=https://api.us-cbdc.gov/cases
+      - EU_CASE_ENDPOINT=https://api.eu-cbdc.europa.eu/cases
+      - UK_CASE_ENDPOINT=https://api.uk-cbdc.gov.uk/cases
+      - CA_CASE_ENDPOINT=https://api.ca-cbdc.gc.ca/cases
+      - JP_CASE_ENDPOINT=https://api.jp-cbdc.boj.or.jp/cases
+      - AU_CASE_ENDPOINT=https://api.au-cbdc.rba.gov.au/cases
+      - US_SECURE_ENDPOINT=https://secure.us-cbdc.gov
+      - EU_SECURE_ENDPOINT=https://secure.eu-cbdc.europa.eu
+      - UK_SECURE_ENDPOINT=https://secure.uk-cbdc.gov.uk
+      - CA_SECURE_ENDPOINT=https://secure.ca-cbdc.gc.ca
+      - JP_SECURE_ENDPOINT=https://secure.jp-cbdc.boj.or.jp
+      - AU_SECURE_ENDPOINT=https://secure.au-cbdc.rba.gov.au
+      - ALLOWED_ORIGINS=http://localhost:3001,http://localhost:3000
+    networks:
+      - echopay-network
+
+  # API Gateway
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "3001:3000"  # Use port 3001 to avoid conflict with Grafana
+    environment:
+      - NODE_ENV=development
+      - JWT_SECRET=development-secret-key
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - RATE_LIMIT_MAX=1000
+      - ALLOWED_ORIGINS=http://localhost:3001,http://localhost:3000
+    depends_on:
+      - redis
+      - consul
+      - transaction-service
+      - fraud-detection
+      - token-management
+      - compliance-service
+      - reversibility-service
+      - cbdc-registry
+      - international-fraud-coordination
+    networks:
+      - echopay-network
+
+  # Consul for service discovery
+  consul:
+    image: consul:1.16
+    ports:
+      - "8500:8500"
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    networks:
+      - echopay-network
+
+  # Infrastructure Services
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=echopay
+      - POSTGRES_PASSWORD=echopay_dev
+      - POSTGRES_DB=echopay
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - echopay-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - echopay-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - echopay-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+    networks:
+      - echopay-network
+
+  # Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - echopay-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - echopay-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:
+
+networks:
+  echopay-network:
+    driver: bridge

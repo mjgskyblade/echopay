@@ -1,0 +1,40 @@
+{
+  "name": "echopay-api-gateway",
+  "version": "1.0.0",
+  "description": "EchoPay API Gateway with load balancing, rate limiting, and authentication",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2",
+    "http-proxy-middleware": "^2.0.6",
+    "consul": "^0.40.0",
+    "redis": "^4.6.10",
+    "winston": "^3.11.0",
+    "express-prometheus-middleware": "^1.2.0",
+    "prom-client": "^13.2.0",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "nodemon": "^3.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/src/tests/setup.js"],
+    "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"],
+    "testTimeout": 10000
+  }
+}

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoPay Wallet - Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .wallet-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .transaction-item:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+        .fraud-alert {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <i class="fas fa-wallet text-blue-600 text-2xl mr-3"></i>
+                    <h1 class="text-xl font-bold text-gray-800">EchoPay Wallet</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="demo-multi-wallet.html" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-wallet mr-1"></i>Multi-Wallet
+                    </a>
+                    <a href="demo-device-management.html" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-mobile-alt mr-1"></i>Devices
+                    </a>
+                    <a href="demo-fraud-report.html" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>Report Fraud
+                    </a>
+                    <a href="demo-reversal-history.html" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-undo mr-1"></i>Reversals
+                    </a>
+                    <button class="relative p-2 text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">3</span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <img class="w-8 h-8 rounded-full" src="https://via.placeholder.com/32" alt="User">
+                        <span class="text-gray-700">Demo User</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Wallet Overview -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Main Wallet Card -->
+            <div class="lg:col-span-2">
+                <div class="wallet-card rounded-xl p-6 text-white">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 class="text-lg font-medium opacity-90">Main Wallet</h2>
+                            <p class="text-sm opacity-75">wallet-demo-12345</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-bold">$12,847.50</div>
+                            <div class="text-sm opacity-75">
+                                <span>$250.00 pending</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex space-x-4">
+                            <button class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-all">
+                                <i class="fas fa-paper-plane mr-2"></i>Send
+                            </button>
+                            <button class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-all">
+                                <i class="fas fa-qrcode mr-2"></i>Receive
+                            </button>
+                        </div>
+                        <div class="text-sm opacity-75">
+                            <i class="fas fa-shield-alt mr-1"></i>
+                            <span>Fraud Score: Low</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="space-y-4">
+                <div class="bg-white rounded-xl p-4 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">This Month</p>
+                            <p class="text-2xl font-bold text-gray-800">$3,247.80</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-chart-line text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-sm">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600">Transactions</p>
+                            <p class="text-2xl font-bold text-gray-800">47</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-exchange-alt text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fraud Alerts -->
+        <div class="mb-6">
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg fraud-alert">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            ML Fraud Detection: Unusual transaction pattern detected. 1 transaction flagged for review.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <div class="bg-white rounded-xl shadow-sm">
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-6">
+                    <button class="tab-btn active py-4 px-1 border-b-2 border-blue-500 font-medium text-blue-600" onclick="showTab('transactions')">
+                        <i class="fas fa-list mr-2"></i>Transactions
+                    </button>
+                    <button class="tab-btn py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" onclick="showTab('analytics')">
+                        <i class="fas fa-chart-pie mr-2"></i>Analytics
+                    </button>
+                    <button class="tab-btn py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" onclick="showTab('settings')">
+                        <i class="fas fa-cog mr-2"></i>Settings
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Transactions Tab -->
+            <div id="transactionsTab" class="tab-content p-6">
+                <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+                    <div class="flex items-center space-x-4">
+                        <select class="border border-gray-300 rounded-lg px-3 py-2">
+                            <option value="all">All Transactions</option>
+                            <option value="sent">Sent</option>
+                            <option value="received">Received</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                        <input type="text" placeholder="Search transactions..." 
+                               class="border border-gray-300 rounded-lg px-3 py-2 w-64">
+                    </div>
+                    <button class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700">
+                        <i class="fas fa-flag mr-2"></i>Flagged (1)
+                    </button>
+                </div>
+
+                <!-- Sample Transactions -->
+                <div class="space-y-3">
+                    <div class="transaction-item bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-red-100 p-2 rounded-full mr-4">
+                                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Suspicious Transaction - FLAGGED</p>
+                                <p class="text-sm text-gray-600">To: wallet-unknown-999 • Today 3:24 AM</p>
+                                <p class="text-xs text-red-600">Risk Score: 0.87 (High)</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-red-600">-$10,000.00</p>
+                            <p class="text-sm text-gray-500">USD-CBDC</p>
+                        </div>
+                    </div>
+
+                    <div class="transaction-item bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 p-2 rounded-full mr-4">
+                                <i class="fas fa-arrow-down text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Payment Received</p>
+                                <p class="text-sm text-gray-600">From: wallet-business-456 • Yesterday 2:15 PM</p>
+                                <p class="text-xs text-green-600">Risk Score: 0.12 (Low)</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-green-600">+$1,250.00</p>
+                            <p class="text-sm text-gray-500">USD-CBDC</p>
+                        </div>
+                    </div>
+
+                    <div class="transaction-item bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-2 rounded-full mr-4">
+                                <i class="fas fa-arrow-up text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Coffee Shop Payment</p>
+                                <p class="text-sm text-gray-600">To: wallet-merchant-789 • Yesterday 8:30 AM</p>
+                                <p class="text-xs text-green-600">Risk Score: 0.05 (Low)</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-gray-800">-$4.50</p>
+                            <p class="text-sm text-gray-500">USD-CBDC</p>
+                        </div>
+                    </div>
+
+                    <div class="transaction-item bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 p-2 rounded-full mr-4">
+                                <i class="fas fa-exchange-alt text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">Cross-Currency Exchange</p>
+                                <p class="text-sm text-gray-600">EUR-CBDC → USD-CBDC • 2 days ago</p>
+                                <p class="text-xs text-green-600">Risk Score: 0.08 (Low)</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-gray-800">€500.00 → $547.50</p>
+                            <p class="text-sm text-gray-500">Multi-CBDC</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analyticsTab" class="tab-content p-6 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-4">Fraud Detection Analytics</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span>Transactions Analyzed</span>
+                                <span class="font-bold">1,247</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Flagged for Review</span>
+                                <span class="font-bold text-yellow-600">3</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Confirmed Fraud</span>
+                                <span class="font-bold text-red-600">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Average Risk Score</span>
+                                <span class="font-bold text-green-600">0.12</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-4">Multi-CBDC Usage</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span>USD-CBDC</span>
+                                <span class="font-bold">$12,847.50</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>EUR-CBDC</span>
+                                <span class="font-bold">€2,340.80</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>GBP-CBDC</span>
+                                <span class="font-bold">£890.25</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content p-6 hidden">
+                <div class="max-w-2xl">
+                    <h3 class="text-lg font-semibold mb-6">Wallet Settings</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-medium">Fraud Detection</h4>
+                                <p class="text-sm text-gray-600">Real-time ML-powered fraud analysis</p>
+                            </div>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Active</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-medium">Transaction Reversibility</h4>
+                                <p class="text-sm text-gray-600">Enable transaction reversals for fraud protection</p>
+                            </div>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Enabled</span>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-medium">Multi-Device Sync</h4>
+                                <p class="text-sm text-gray-600">Synchronize across all your devices</p>
+                            </div>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active', 'border-blue-500', 'text-blue-600');
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+        }
+    </script>
+</body>
+</html>

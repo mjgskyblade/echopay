@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Wallet Management - EchoPay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .wallet-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #007bff;
+        }
+        .wallet-card:hover {
+            transform: translateY(-2px);
+        }
+        .wallet-card.primary {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        .wallet-balance {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .wallet-type-badge {
+            font-size: 0.8em;
+        }
+        .sync-status {
+            font-size: 0.9em;
+        }
+        .transfer-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .statistics-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt me-2"></i>EchoPay
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Dashboard</a>
+                <a class="nav-link active" href="/multi-wallet.html">Multi-Wallet</a>
+                <a class="nav-link" href="/device-management.html">Devices</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-wallet me-2"></i>Multi-Wallet Management</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createWalletModal">
+                        <i class="fas fa-plus me-2"></i>Create New Wallet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card statistics-card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-chart-pie me-2"></i>Wallet Overview
+                        </h5>
+                        <div class="row" id="walletStats">
+                            <!-- Statistics will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card transfer-section">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">
+                            <i class="fas fa-exchange-alt me-2"></i>Quick Transfer
+                        </h5>
+                        <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#transferModal">
+                            Transfer Between Wallets
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet List -->
+        <div class="row" id="walletList">
+            <!-- Wallets will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Create Wallet Modal -->
+    <div class="modal fade" id="createWalletModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createWalletForm">
+                        <div class="mb-3">
+                            <label for="walletName" class="form-label">Wallet Name</label>
+                            <input type="text" class="form-control" id="walletName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="walletType" class="form-label">Wallet Type</label>
+                            <select class="form-select" id="walletType" required>
+                                <option value="personal">Personal</option>
+                                <option value="business">Business</option>
+                                <option value="savings">Savings</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="currency" class="form-label">Currency</label>
+                            <select class="form-select" id="currency">
+                                <option value="USD-CBDC">USD-CBDC</option>
+                                <option value="EUR-CBDC">EUR-CBDC</option>
+                                <option value="GBP-CBDC">GBP-CBDC</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description (Optional)</label>
+                            <textarea class="form-control" id="description" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="walletColor" class="form-label">Wallet Color</label>
+                            <input type="color" class="form-control form-control-color" id="walletColor" value="#007bff">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createWallet()">Create Wallet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div class="modal fade" id="transferModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Transfer Between Wallets</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transferForm">
+                        <div class="mb-3">
+                            <label for="fromWallet" class="form-label">From Wallet</label>
+                            <select class="form-select" id="fromWallet" required>
+                                <option value="">Select source wallet</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="toWallet" class="form-label">To Wallet</label>
+                            <select class="form-select" id="toWallet" required>
+                                <option value="">Select destination wallet</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transferAmount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="transferAmount" step="0.01" min="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transferDescription" class="form-label">Description (Optional)</label>
+                            <input type="text" class="form-control" id="transferDescription">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="transferFunds()">Transfer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Settings Modal -->
+    <div class="modal fade" id="walletSettingsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Wallet Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="walletSettingsForm">
+                        <input type="hidden" id="settingsWalletId">
+                        <div class="mb-3">
+                            <label for="settingsWalletName" class="form-label">Wallet Name</label>
+                            <input type="text" class="form-control" id="settingsWalletName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="settingsWalletType" class="form-label">Wallet Type</label>
+                            <select class="form-select" id="settingsWalletType">
+                                <option value="personal">Personal</option>
+                                <option value="business">Business</option>
+                                <option value="savings">Savings</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="settingsDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="settingsDescription" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="settingsWalletColor" class="form-label">Wallet Color</label>
+                            <input type="color" class="form-control form-control-color" id="settingsWalletColor">
+                        </div>
+                        <div class="mb-3">
+                            <h6>Permissions</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="canSend">
+                                <label class="form-check-label" for="canSend">Can Send</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="canReceive">
+                                <label class="form-check-label" for="canReceive">Can Receive</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="requiresApproval">
+                                <label class="form-check-label" for="requiresApproval">Requires Approval</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateWalletSettings()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/multi-wallet.js"></script>
+</body>
+</html>

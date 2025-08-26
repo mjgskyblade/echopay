@@ -1,0 +1,133 @@
+openapi: 3.0.3
+info:
+  title: EchoPay Reversibility Service API
+  version: 1.0.0
+  description: Fraud reporting and transaction reversal service
+  contact:
+    name: EchoPay Development Team
+
+servers:
+  - url: http://localhost:8005
+    description: Local development server
+
+paths:
+  /api/v1/fraud-reports:
+    post:
+      summary: Submit fraud report
+      description: Report a fraudulent transaction for investigation
+      operationId: submitFraudReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../models/fraud-case.yaml#/components/schemas/FraudReport'
+      responses:
+        '201':
+          description: Fraud report submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  caseId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                  estimatedResolution:
+                    type: string
+        '400':
+          description: Invalid fraud report
+
+  /api/v1/fraud-cases/{caseId}:
+    get:
+      summary: Get fraud case details
+      description: Retrieve details of a specific fraud case
+      operationId: getFraudCase
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Fraud case details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '../models/fraud-case.yaml#/components/schemas/FraudCase'
+        '404':
+          description: Fraud case not found
+
+  /api/v1/fraud-cases/{caseId}/resolve:
+    post:
+      summary: Resolve fraud case
+      description: Mark a fraud case as resolved with outcome
+      operationId: resolveFraudCase
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resolution:
+                  type: string
+                  enum: [fraud_confirmed, fraud_denied, insufficient_evidence]
+                notes:
+                  type: string
+                arbitratorId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Case resolved successfully
+        '400':
+          description: Invalid resolution data
+        '404':
+          description: Case not found
+
+  /api/v1/reversals:
+    post:
+      summary: Execute transaction reversal
+      description: Reverse a confirmed fraudulent transaction
+      operationId: executeReversal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transactionId:
+                  type: string
+                  format: uuid
+                caseId:
+                  type: string
+                  format: uuid
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Reversal executed successfully
+        '400':
+          description: Invalid reversal request
+        '409':
+          description: Transaction cannot be reversed
+
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy

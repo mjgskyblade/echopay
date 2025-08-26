@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Fraud - EchoPay Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        .step-indicator.active {
+            background-color: #3B82F6;
+            color: white;
+        }
+        .step-indicator.completed {
+            background-color: #10B981;
+            color: white;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="demo-index.html" class="flex items-center text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <i class="fas fa-wallet text-2xl mr-3"></i>
+                        <h1 class="text-xl font-bold text-gray-800">EchoPay Wallet</h1>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">Report Fraud</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Progress Indicator -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="step-indicator active w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold mr-4" data-step="1">
+                        1
+                    </div>
+                    <span class="text-sm font-medium text-gray-700">Transaction Details</span>
+                </div>
+                <div class="flex-1 mx-4">
+                    <div class="h-1 bg-gray-200 rounded">
+                        <div class="progress-bar h-1 bg-blue-600 rounded" style="width: 33%"></div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="step-indicator w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold mr-4 bg-gray-200 text-gray-600" data-step="2">
+                        2
+                    </div>
+                    <span class="text-sm font-medium text-gray-500">Evidence & Details</span>
+                </div>
+                <div class="flex-1 mx-4">
+                    <div class="h-1 bg-gray-200 rounded">
+                        <div class="progress-bar h-1 bg-gray-200 rounded" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="step-indicator w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold bg-gray-200 text-gray-600" data-step="3">
+                        3
+                    </div>
+                    <span class="text-sm font-medium text-gray-500">Review & Submit</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fraud Report Form -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <!-- Step 1: Transaction Details -->
+            <div id="step1" class="step-content active">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Transaction Details</h2>
+                    <p class="text-gray-600">Please provide details about the fraudulent transaction you want to report.</p>
+                </div>
+
+                <form class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Transaction ID</label>
+                            <input type="text" value="tx_demo_suspicious_001" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <button type="button" class="mt-2 text-sm text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-search mr-1"></i>Search my transactions
+                            </button>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Transaction Date</label>
+                            <input type="date" value="2025-01-14" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                            <input type="number" value="10000.00" step="0.01" min="0"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="USD-CBDC" selected>USD-CBDC</option>
+                                <option value="EUR-CBDC">EUR-CBDC</option>
+                                <option value="GBP-CBDC">GBP-CBDC</option>
+                                <option value="JPY-CBDC">JPY-CBDC</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fraud Type</label>
+                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="unauthorized_transaction" selected>Unauthorized Transaction</option>
+                            <option value="account_takeover">Account Takeover</option>
+                            <option value="phishing_scam">Phishing Scam</option>
+                            <option value="fake_merchant">Fake Merchant</option>
+                            <option value="social_engineering">Social Engineering</option>
+                            <option value="identity_theft">Identity Theft</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Brief Description</label>
+                        <textarea rows="3" 
+                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="I noticed a large unauthorized transaction from my wallet at 3:24 AM to an unknown recipient. I was asleep and did not authorize this transaction.">I noticed a large unauthorized transaction from my wallet at 3:24 AM to an unknown recipient. I was asleep and did not authorize this transaction.</textarea>
+                    </div>
+
+                    <!-- ML Fraud Detection Alert -->
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">ML Fraud Detection Alert</h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p>Our AI system has flagged this transaction with a high risk score of <strong>0.87</strong>:</p>
+                                    <ul class="list-disc list-inside mt-2">
+                                        <li>Unusual transaction time (3:24 AM)</li>
+                                        <li>Large amount deviation from normal pattern</li>
+                                        <li>Unknown recipient wallet</li>
+                                        <li>No recent device activity before transaction</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="button" onclick="nextStep(2)" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">
+                            Next: Evidence & Details
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 2: Evidence & Details -->
+            <div id="step2" class="step-content">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Evidence & Additional Details</h2>
+                    <p class="text-gray-600">Provide additional information and upload any evidence to support your fraud report.</p>
+                </div>
+
+                <form class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Detailed Description</label>
+                        <textarea rows="5" 
+                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Please provide a detailed description...">I discovered this unauthorized transaction when I checked my wallet this morning. The transaction occurred at 3:24 AM while I was asleep. The amount of $10,000 is significantly larger than my usual transactions, and the recipient wallet (wallet-unknown-999) is not in my contacts. I have never authorized any transaction to this wallet. My phone was charging next to my bed and I did not receive any transaction notifications during the night.</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">When did you first notice?</label>
+                            <input type="datetime-local" value="2025-01-14T08:30" 
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Have you contacted the recipient?</label>
+                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="unknown_recipient" selected>Unknown recipient</option>
+                                <option value="yes">Yes, I contacted them</option>
+                                <option value="no">No, I haven't contacted them</option>
+                                <option value="unable">Unable to contact them</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload Evidence</label>
+                        <p class="text-sm text-gray-500 mb-3">Upload screenshots, emails, messages, or other evidence</p>
+                        
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-700 mb-2">Drop files here or click to browse</p>
+                            <p class="text-sm text-gray-500">Supported formats: JPG, PNG, PDF, DOC, TXT</p>
+                            <input type="file" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt" class="hidden">
+                        </div>
+
+                        <!-- Sample uploaded files -->
+                        <div class="mt-4 space-y-2">
+                            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="fas fa-file-image text-blue-600 mr-3"></i>
+                                    <span class="text-sm">screenshot_transaction_alert.png</span>
+                                </div>
+                                <button class="text-red-600 hover:text-red-800">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="fas fa-file-pdf text-red-600 mr-3"></i>
+                                    <span class="text-sm">phone_location_proof.pdf</span>
+                                </div>
+                                <button class="text-red-600 hover:text-red-800">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button type="button" onclick="nextStep(1)" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                            <i class="fas fa-arrow-left mr-2"></i>Back
+                        </button>
+                        <button type="button" onclick="nextStep(3)" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">
+                            Next: Review & Submit
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 3: Review & Submit -->
+            <div id="step3" class="step-content">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Review & Submit</h2>
+                    <p class="text-gray-600">Please review your fraud report before submitting.</p>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Review Summary -->
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Report Summary</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Transaction ID:</span>
+                                <span class="font-medium">tx_demo_suspicious_001</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Amount:</span>
+                                <span class="font-medium">$10,000.00 USD-CBDC</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Fraud Type:</span>
+                                <span class="font-medium">Unauthorized Transaction</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">ML Risk Score:</span>
+                                <span class="font-medium text-red-600">0.87 (High Risk)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Evidence Files:</span>
+                                <span class="font-medium">2 files uploaded</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <input type="checkbox" checked class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <div class="ml-3">
+                                <label class="text-sm font-medium text-gray-700">
+                                    I acknowledge and agree to the following:
+                                </label>
+                                <ul class="mt-2 text-sm text-gray-600 space-y-1">
+                                    <li>• The information provided is accurate to the best of my knowledge</li>
+                                    <li>• Filing a false fraud report is a serious offense</li>
+                                    <li>• I understand that investigation may take up to 72 hours</li>
+                                    <li>• I will cooperate with any additional investigation requirements</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button type="button" onclick="nextStep(2)" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                            <i class="fas fa-arrow-left mr-2"></i>Back
+                        </button>
+                        <button type="button" onclick="submitReport()" class="bg-red-600 text-white px-8 py-2 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500">
+                            <i class="fas fa-flag mr-2"></i>Submit Fraud Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-check text-2xl text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Report Submitted Successfully</h3>
+                <p class="text-gray-600 mb-4">Your fraud report has been submitted and assigned case number:</p>
+                <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                    <span class="font-mono text-lg font-semibold text-blue-600">FRAUD-2025-001247</span>
+                </div>
+                <p class="text-sm text-gray-500 mb-6">You will receive updates on the investigation progress. Expected resolution time is within 72 hours.</p>
+                <div class="flex space-x-3">
+                    <button onclick="window.location.href='demo-fraud-case-tracker.html'" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                        Track Case
+                    </button>
+                    <button onclick="window.location.href='demo-index.html'" class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400">
+                        Return Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function nextStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show target step
+            document.getElementById('step' + step).classList.add('active');
+            
+            // Update progress indicators
+            document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+                indicator.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    indicator.classList.add('completed');
+                } else if (index + 1 === step) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.add('bg-gray-200', 'text-gray-600');
+                }
+            });
+            
+            // Update progress bar
+            const progress = (step - 1) * 50;
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                bar.style.width = progress + '%';
+            });
+        }
+        
+        function submitReport() {
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('successModal').classList.add('flex');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+openapi: 3.0.3
+info:
+  title: EchoPay Token Management Service API
+  version: 1.0.0
+  description: CBDC token lifecycle management and ledger maintenance
+  contact:
+    name: EchoPay Development Team
+
+servers:
+  - url: http://localhost:8003
+    description: Local development server
+
+paths:
+  /api/v1/tokens:
+    post:
+      summary: Create new tokens
+      description: Issue new CBDC tokens to a wallet
+      operationId: createTokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cbdcType:
+                  type: string
+                  enum: [USD-CBDC, EUR-CBDC, GBP-CBDC]
+                denomination:
+                  type: number
+                  format: decimal
+                  minimum: 0.01
+                quantity:
+                  type: integer
+                  minimum: 1
+                ownerWallet:
+                  type: string
+                  format: uuid
+                metadata:
+                  type: object
+                  properties:
+                    issuer:
+                      type: string
+                    series:
+                      type: string
+      responses:
+        '201':
+          description: Tokens created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tokenIds:
+                    type: array
+                    items:
+                      type: string
+                      format: uuid
+                  totalValue:
+                    type: number
+                    format: decimal
+        '400':
+          description: Invalid token creation request
+
+  /api/v1/tokens/{tokenId}:
+    get:
+      summary: Get token details
+      description: Retrieve details of a specific token
+      operationId: getToken
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Token details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '../models/token.yaml#/components/schemas/Token'
+        '404':
+          description: Token not found
+
+  /api/v1/tokens/{tokenId}/transfer:
+    post:
+      summary: Transfer token ownership
+      description: Transfer a token from one wallet to another
+      operationId: transferToken
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fromWallet:
+                  type: string
+                  format: uuid
+                toWallet:
+                  type: string
+                  format: uuid
+                transactionId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Token transferred successfully
+        '400':
+          description: Invalid transfer request
+        '403':
+          description: Token is frozen or disputed
+        '404':
+          description: Token not found
+
+  /api/v1/tokens/{tokenId}/freeze:
+    post:
+      summary: Freeze token
+      description: Freeze a token to prevent its use
+      operationId: freezeToken
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  enum: [fraud_investigation, compliance_hold, dispute]
+                caseId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Token frozen successfully
+        '404':
+          description: Token not found
+
+  /api/v1/tokens/{tokenId}/unfreeze:
+    post:
+      summary: Unfreeze token
+      description: Restore a frozen token to active status
+      operationId: unfreezeToken
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                caseId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Token unfrozen successfully
+        '404':
+          description: Token not found
+
+  /api/v1/wallets/{walletId}/tokens:
+    get:
+      summary: Get wallet tokens
+      description: Retrieve all tokens owned by a specific wallet
+      operationId: getWalletTokens
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, frozen, disputed, invalid]
+        - name: cbdcType
+          in: query
+          schema:
+            type: string
+            enum: [USD-CBDC, EUR-CBDC, GBP-CBDC]
+      responses:
+        '200':
+          description: Wallet tokens retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tokens:
+                    type: array
+                    items:
+                      $ref: '../models/token.yaml#/components/schemas/Token'
+                  totalValue:
+                    type: number
+                    format: decimal
+                  totalCount:
+                    type: integer
+
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy

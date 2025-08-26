@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Wallet Management - EchoPay Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .wallet-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #007bff;
+        }
+        .wallet-card:hover {
+            transform: translateY(-2px);
+        }
+        .wallet-card.primary {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        .wallet-balance {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .transfer-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .statistics-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="demo-index.html">
+                <i class="fas fa-shield-alt me-2"></i>EchoPay
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="demo-index.html">Dashboard</a>
+                <a class="nav-link active" href="demo-multi-wallet.html">Multi-Wallet</a>
+                <a class="nav-link" href="demo-device-management.html">Devices</a>
+                <a class="nav-link" href="demo-fraud-report.html">Report Fraud</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-wallet me-2"></i>Multi-Wallet Management</h2>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createWalletModal">
+                        <i class="fas fa-plus me-2"></i>Create New Wallet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card statistics-card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-chart-pie me-2"></i>Wallet Overview
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4>4</h4>
+                                    <small>Total Wallets</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4>$18,247</h4>
+                                    <small>Total Balance</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4>3</h4>
+                                    <small>Currencies</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h4>47</h4>
+                                    <small>Transactions</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card transfer-section">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">
+                            <i class="fas fa-exchange-alt me-2"></i>Quick Transfer
+                        </h5>
+                        <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#transferModal">
+                            Transfer Between Wallets
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet List -->
+        <div class="row">
+            <!-- Primary Wallet -->
+            <div class="col-md-6 mb-4">
+                <div class="card wallet-card primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title">
+                                    <i class="fas fa-star text-warning me-2"></i>Main Wallet
+                                    <span class="badge bg-success ms-2">Primary</span>
+                                </h5>
+                                <p class="text-muted small">wallet-demo-12345</p>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>History</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="wallet-balance text-success">$12,847.50</div>
+                        <p class="text-muted">USD-CBDC</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt text-success me-1"></i>Fraud Score: Low
+                            </small>
+                            <small class="text-muted">Last used: Today</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Wallet -->
+            <div class="col-md-6 mb-4">
+                <div class="card wallet-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title">
+                                    <i class="fas fa-briefcase text-primary me-2"></i>Business Wallet
+                                    <span class="badge bg-primary ms-2">Business</span>
+                                </h5>
+                                <p class="text-muted small">wallet-business-67890</p>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>History</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="wallet-balance text-primary">€2,340.80</div>
+                        <p class="text-muted">EUR-CBDC</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt text-success me-1"></i>Fraud Score: Low
+                            </small>
+                            <small class="text-muted">Last used: Yesterday</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings Wallet -->
+            <div class="col-md-6 mb-4">
+                <div class="card wallet-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title">
+                                    <i class="fas fa-piggy-bank text-info me-2"></i>Savings Wallet
+                                    <span class="badge bg-info ms-2">Savings</span>
+                                </h5>
+                                <p class="text-muted small">wallet-savings-11111</p>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>History</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="wallet-balance text-info">£890.25</div>
+                        <p class="text-muted">GBP-CBDC</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt text-success me-1"></i>Fraud Score: Low
+                            </small>
+                            <small class="text-muted">Last used: 3 days ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Travel Wallet -->
+            <div class="col-md-6 mb-4">
+                <div class="card wallet-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title">
+                                    <i class="fas fa-plane text-warning me-2"></i>Travel Wallet
+                                    <span class="badge bg-warning ms-2">Travel</span>
+                                </h5>
+                                <p class="text-muted small">wallet-travel-22222</p>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>History</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="wallet-balance text-warning">¥125,000</div>
+                        <p class="text-muted">JPY-CBDC</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt text-success me-1"></i>Fraud Score: Low
+                            </small>
+                            <small class="text-muted">Last used: 1 week ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Cross-Wallet Activity -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-exchange-alt me-2"></i>Recent Cross-Wallet Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>EUR → USD Exchange</strong>
+                                    <br><small class="text-muted">Business Wallet → Main Wallet • 2 hours ago</small>
+                                </div>
+                                <span class="badge bg-success">€500 → $547.50</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Savings Transfer</strong>
+                                    <br><small class="text-muted">Main Wallet → Savings Wallet • Yesterday</small>
+                                </div>
+                                <span class="badge bg-info">$1,000 → £820.50</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Travel Fund</strong>
+                                    <br><small class="text-muted">Main Wallet → Travel Wallet • 3 days ago</small>
+                                </div>
+                                <span class="badge bg-warning">$800 → ¥110,000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Wallet Modal -->
+    <div class="modal fade" id="createWalletModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="walletName" class="form-label">Wallet Name</label>
+                            <input type="text" class="form-control" id="walletName" placeholder="Enter wallet name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="walletType" class="form-label">Wallet Type</label>
+                            <select class="form-select" id="walletType">
+                                <option value="personal">Personal</option>
+                                <option value="business">Business</option>
+                                <option value="savings">Savings</option>
+                                <option value="travel">Travel</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="currency" class="form-label">Currency</label>
+                            <select class="form-select" id="currency">
+                                <option value="USD-CBDC">USD-CBDC</option>
+                                <option value="EUR-CBDC">EUR-CBDC</option>
+                                <option value="GBP-CBDC">GBP-CBDC</option>
+                                <option value="JPY-CBDC">JPY-CBDC</option>
+                                <option value="CNY-CBDC">CNY-CBDC</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Create Wallet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div class="modal fade" id="transferModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Transfer Between Wallets</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="fromWallet" class="form-label">From Wallet</label>
+                            <select class="form-select" id="fromWallet">
+                                <option value="">Select source wallet</option>
+                                <option value="main">Main Wallet (USD-CBDC)</option>
+                                <option value="business">Business Wallet (EUR-CBDC)</option>
+                                <option value="savings">Savings Wallet (GBP-CBDC)</option>
+                                <option value="travel">Travel Wallet (JPY-CBDC)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="toWallet" class="form-label">To Wallet</label>
+                            <select class="form-select" id="toWallet">
+                                <option value="">Select destination wallet</option>
+                                <option value="main">Main Wallet (USD-CBDC)</option>
+                                <option value="business">Business Wallet (EUR-CBDC)</option>
+                                <option value="savings">Savings Wallet (GBP-CBDC)</option>
+                                <option value="travel">Travel Wallet (JPY-CBDC)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transferAmount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="transferAmount" step="0.01" min="0.01" placeholder="0.00">
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Cross-currency transfers will use real-time exchange rates with a 0.1% fee.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success">Transfer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
